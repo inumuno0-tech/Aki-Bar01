@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="WanderDesk 旅遊探索與行前情報站：查天氣、找城市特色書籍、換算旅遊匯率。">
+  <title>{% block title %}WanderDesk｜旅遊探索與行前情報站{% endblock %}</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">W</span><span>WanderDesk<small>旅遊探索與行前情報站</small></span></a><a class="nav-link" href="#tools">行前工具 <span>↘</span></a></header>
+  <main class="page">{% block content %}{% endblock %}</main>
+  <footer class="footer"><div><strong>資料來源</strong><p>天氣與地理資料：<a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a>，依 CC BY 4.0 標示。書目資料：<a href="https://openlibrary.org/" target="_blank" rel="noreferrer">Open Library</a>。匯率資料：<a href="https://frankfurter.dev/" target="_blank" rel="noreferrer">Frankfurter</a>。</p></div><span>為下一段旅程，多做一點準備。</span></footer>
+</body></html>
