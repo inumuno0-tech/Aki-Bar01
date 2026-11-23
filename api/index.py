@@ -26,7 +26,8 @@ def index():
     """首頁提供伺服器渲染表單與預設探索城市。"""
     currencies = get_currencies()
     return render_template("index.html", result=None, active="", currencies=currencies,
-                           popular=POPULAR, city="", places=[], weather=None, books=None)
+                           popular=POPULAR, city="", places=[], weather=None, books=None,
+                           books_error=None)
 
 
 @app.post("/explore")
@@ -39,6 +40,7 @@ def explore():
     places = []
     weather = None
     books = None
+    books_error = None
     book_query = request.form.get("book_query", "").strip()
     try:
         if action == "weather":
@@ -53,19 +55,27 @@ def explore():
             except (ValueError, IndexError):
                 place = places[0]
             weather = get_weather(place=place)
-            book_query = book_query or place.get("name", city)
-            books = search_books(book_query)
+            # 保留使用者輸入的英文城市名；地理編碼回傳的中文地名不適合 Open Library 搜尋。
+            book_query = book_query or city or place.get("name", "")
+            try:
+                books = search_books(book_query)
+            except BookError as exc:
+                # 書目服務失敗時仍顯示已成功取得的天氣資料。
+                books_error = str(exc)
         elif action == "books":
             if not book_query or len(book_query) > 120:
                 raise BookError("請輸入 1 至 120 個字元的書籍或旅遊關鍵字。")
             books = search_books(book_query)
         else:
             error = "請從城市搜尋或書籍搜尋開始探索。"
-    except (WeatherError, BookError) as exc:
+    except WeatherError as exc:
         error = str(exc)
+    except BookError as exc:
+        books_error = str(exc)
     return render_template("index.html", result=result, active=action, currencies=get_currencies(),
                            popular=POPULAR, city=city, places=places, weather=weather,
-                           books=books, book_query=book_query, error=error)
+                           books=books, book_query=book_query, error=error,
+                           books_error=books_error)
 
 
 @app.get("/api/currencies")
@@ -90,7 +100,7 @@ def convert_api():
 def too_large(_error):
     return render_template("index.html", result=None, active="", currencies=POPULAR,
                            popular=POPULAR, city="", places=[], weather=None, books=None,
-                           error="提交的內容太長，請縮短後再試。"), 413
+                           error="提交的內容太長，請縮短後再試。", books_error=None), 413
 
 
 if __name__ == "__main__":
