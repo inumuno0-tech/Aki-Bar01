@@ -11,6 +11,8 @@ def search_books(query):
         data = get_json("https://openlibrary.org/search.json",
                         params={"q": query, "limit": 9}, cache_seconds=1800)
     except UpstreamError as exc:
+        if "HTTP 422" in str(exc):
+            raise BookError("Open Library 暫時無法接受這個關鍵字，請改用英文城市名或較簡短的旅遊主題。") from exc
         raise BookError(str(exc)) from exc
     books = []
     for item in data.get("docs", []):
